@@ -227,6 +227,12 @@ class TestExpMongoDBConnector(unittest.TestCase):
     def test_input(self):
         with self.assertRaises(ValueError):
             mongotools.ExpMongoDBConnector("test")
+    
+    def test_no_mongo_agent(self):
+        exp = alfred.Experiment()
+        with self.assertRaises(ValueError):
+            connector = mongotools.ExpMongoDBConnector(exp)
+            connector.connect()
 
 
 if __name__ == "__main__":
