@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="alfred3_dbtools",
-    version="0.1.0",
+    version="0.1.1",
     author="Christian Treffenstädt, Johannes Brachem",
     author_email="treffenstaedt@psych.uni-goettingen.de",
     description="A package that provides tools for interacting with databases when working with alfred3 experiments.",
