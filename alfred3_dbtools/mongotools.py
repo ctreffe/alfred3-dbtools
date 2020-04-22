@@ -116,7 +116,7 @@ class ExpMongoDBConnector:
 
         if not isinstance(self._exp, alfred.Experiment):
             raise ValueError("The input must be an instance of alfred.Experiment.")
-    
+
     def _gather_agents(self):
         """Collect all MongoSavingAgents from the provided alfred experiment, sorted by activation level (lowest first)."""
 
@@ -124,6 +124,8 @@ class ExpMongoDBConnector:
         for agent in self._exp.saving_agent_controller._agents:
             if isinstance(agent, alfred.saving_agent.MongoSavingAgent):
                 self._agents.append(copy.copy(agent))
+        if not self._agents:
+            raise ValueError("Your experiment needs at least one MongoSavingAgent for ExpMongoDBConnector to work.")
         self._agents.sort(key=lambda x: x.activation_level)
         
     def connect(self):
