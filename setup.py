@@ -12,7 +12,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ctreffe/alfred3-dbtools",
-    package_dir={"": "alfred3_dbtools"},
     packages=setuptools.find_packages(),
     install_requires=["alfred>=1.0.0", "pymongo>=3.10"],
     classifiers=[
