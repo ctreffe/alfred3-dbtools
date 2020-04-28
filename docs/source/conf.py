@@ -12,7 +12,13 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.../../alfred3_dbtools'))
+sys.path.insert(0, os.path.abspath('../../alfred3_dbtools'))
+
+# Parse version from _version.py in package directory
+# See https://packaging.python.org/guides/single-sourcing-package-version/#single-sourcing-the-version
+version = {}
+with open('.../../alfred3_dbtools/_version.py') as f:
+    exec(f.read(), version)
 
 
 # -- Project information -----------------------------------------------------
@@ -22,7 +28,9 @@ copyright = '2020, Christian Treffenstädt, Johannes Brachem'
 author = 'Christian Treffenstädt, Johannes Brachem'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.2'
+release = version["__version__"]
+
+master_doc = 'index'
 
 
 # -- General configuration ---------------------------------------------------
