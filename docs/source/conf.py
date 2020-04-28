@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../../alfred3_dbtools'))
 # Parse version from _version.py in package directory
 # See https://packaging.python.org/guides/single-sourcing-package-version/#single-sourcing-the-version
 version = {}
-with open('.../../alfred3_dbtools/_version.py') as f:
+with open('../../alfred3_dbtools/_version.py') as f:
     exec(f.read(), version)
 
 
