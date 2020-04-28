@@ -7,6 +7,8 @@ Alfred3 DBTools Documentation
 
     $ pip install alfred3_dbtools
 
+:doc:`CHANGELOG`
+    An overview of notable changes to the package.
 
 :doc:`example` 
     A minimal example that shows how to use alfred3_dbtools.
@@ -17,9 +19,9 @@ Alfred3 DBTools Documentation
 
 .. toctree::
    :maxdepth: 3
-   :numbered:
    :hidden:
 
+   CHANGELOG.md
    example
    apireference
 
