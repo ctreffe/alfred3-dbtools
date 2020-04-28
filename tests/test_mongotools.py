@@ -3,7 +3,7 @@ import os
 import copy
 
 import pymongo
-import alfred
+import alfred3
 
 from alfred3_dbtools import mongotools
 
@@ -28,10 +28,8 @@ class TestMongoDBConnector(unittest.TestCase):
             password=self._pw1,
             database=self._db,
         )
-        ret = con.connect()
         con.connect()
         self.assertTrue(con.connected)
-        self.assertIsInstance(ret, pymongo.database.Database)
         self.assertIsInstance(con.db, pymongo.database.Database)
 
     def test_auth_source_connect(self):
@@ -43,10 +41,8 @@ class TestMongoDBConnector(unittest.TestCase):
             database=self._db,
             auth_source=self._auth_source,
         )
-        ret = con.connect()
         con.connect()
         self.assertTrue(con.connected)
-        self.assertIsInstance(ret, pymongo.database.Database)
         self.assertIsInstance(con.db, pymongo.database.Database)
 
     def test_collection_connect(self):
@@ -59,9 +55,8 @@ class TestMongoDBConnector(unittest.TestCase):
             collection=self._col,
             auth_source=self._auth_source,
         )
-        ret = con.connect()
+        con.connect()
         self.assertTrue(con.connected)
-        self.assertIsInstance(ret, pymongo.collection.Collection)
         self.assertIsInstance(con.db, pymongo.collection.Collection)
 
     def test_autoconnect(self):
@@ -77,6 +72,7 @@ class TestMongoDBConnector(unittest.TestCase):
         self.assertFalse(con.connected)
         col = con.db
         self.assertTrue(con.connected)
+        print(col)
         self.assertIsInstance(col, pymongo.collection.Collection)
 
     def test_disconnect(self):
@@ -89,9 +85,10 @@ class TestMongoDBConnector(unittest.TestCase):
             collection=self._col,
             auth_source=self._auth_source,
         )
-        col = con.connect()
-        self.assertIsInstance(col, pymongo.collection.Collection)
+        con.connect()
+        self.assertIsInstance(con.db, pymongo.collection.Collection)
         con.disconnect()
+        self.assertFalse(con.connected)
 
     def test_insert_find_remove(self):
         con = mongotools.MongoDBConnector(
@@ -103,7 +100,7 @@ class TestMongoDBConnector(unittest.TestCase):
             collection=self._col,
             auth_source=self._auth_source,
         )
-        col = con.connect()
+        col = con.db
         test_document = {"test": "test"}
 
         col.insert_one(test_document)
@@ -125,9 +122,9 @@ class TestExpMongoDBConnector(unittest.TestCase):
         self._col = os.environ.get("MONGODB_TESTCOL")
         self._auth_source = os.environ.get("MONGODB_TEST2AUTH")
 
-        self.exp = alfred.Experiment()
+        self.exp = alfred3.Experiment()
 
-        self.agent = alfred.saving_agent.MongoSavingAgent(
+        self.agent = alfred3.saving_agent.MongoSavingAgent(
             host=self._host + ":" + str(self._port),
             database=self._db,
             collection=self._col,
@@ -142,9 +139,14 @@ class TestExpMongoDBConnector(unittest.TestCase):
 
         self.exp.saving_agent_controller.add_saving_agent(self.agent)
         self.connector = mongotools.ExpMongoDBConnector(self.exp)
+    
+    def tearDown(self):
+        self.exp = None
+        self.connector = None
 
     def test_connect(self):
-        col = self.connector.connect()
+        self.connector.connect()
+        col = self.connector.db
         self.assertIsInstance(col, pymongo.collection.Collection)
         self.assertTrue(self.connector.connected)
     
@@ -181,7 +183,7 @@ class TestExpMongoDBConnector(unittest.TestCase):
 
         # third agent, lower level
         self.exp.saving_agent_controller.add_saving_agent(agent3)
-        col = self.connector.connect()
+        col = self.connector.db
         self.assertTrue(self.connector.connected)
         self.assertIsInstance(col, pymongo.collection.Collection)
 
@@ -192,7 +194,8 @@ class TestExpMongoDBConnector(unittest.TestCase):
         self.assertRaises(ValueError, connector2.connect)
     
     def test_insert_find_remove(self):
-        col = self.connector.connect()
+        self.connector.connect()
+        col = self.connector.db
 
         test_document = {"test": "test"}
 
@@ -229,7 +232,7 @@ class TestExpMongoDBConnector(unittest.TestCase):
             mongotools.ExpMongoDBConnector("test")
     
     def test_no_mongo_agent(self):
-        exp = alfred.Experiment()
+        exp = alfred3.Experiment()
         with self.assertRaises(ValueError):
             connector = mongotools.ExpMongoDBConnector(exp)
             connector.connect()
