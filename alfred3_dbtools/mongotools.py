@@ -1,4 +1,5 @@
-"""Tools for interacting with MongoDB databases."""
+"""Tools for interacting with MongoDB databases.
+"""
 
 import copy
 
@@ -94,7 +95,7 @@ class MongoDBConnector:
                 raise TypeError("No collection found.")
             else:
                 return self._db
-        
+
         elif not self.connected:
             self.connect()
             if self._db is None:
@@ -106,14 +107,22 @@ class MongoDBConnector:
 class ExpMongoDBConnector:
     """Connect to an alfred experiment's MongoDB collection.
     
-    Connects to the same database and collection that the given alfred experiment uses to save its data. If multiple `MongoSavingAgents` are attached to the experiment, ``ExpMongoDBConnector`` will connect to the ``MongoSavingAgent`` with the lowest activation level. Basically, it provides access to a copy of the ``pymongo.MongoClient`` that the experiment's saving agent uses. For further information on how to interact with a `MongoClient`, please refer to the `pymongo documentation <https://pymongo.readthedocs.io/en/stable/tutorial.html>`_.
+    Connects to the same database and collection that the given alfred 
+    experiment uses to save its data. If multiple `MongoSavingAgents` 
+    are attached to the experiment, :class:`ExpMongoDBConnector` will connect
+    to the `MongoSavingAgent` with the lowest activation level. 
+    Basically, it provides access to a copy of the
+    :class:`~pymongo.MongoClient` that the experiment's saving agent
+    uses. For further information on how to interact with a
+    `MongoClient`, please refer to the 
+    `pymongo documentation <https://pymongo.readthedocs.io/en/stable/tutorial.html>`_.
 
-    :param experiment: An instance of ``alfred.Experiment``.
-    :type experiment: class: `alfred.Experiment`
+    :param experiment: An instance of :class:`alfred.Experiment`.
+    :type experiment: class: `alfred3.Experiment`
     :raise: ValueError if not initialised with an alfred experiment.
     """
 
-    def __init__(self, experiment):
+    def __init__(self, experiment: alfred3.Experiment):
         """Constructor method."""
 
         self._exp = experiment
@@ -126,10 +135,11 @@ class ExpMongoDBConnector:
         """`True`, if a connection was established."""
 
         if not isinstance(self._exp, alfred3.Experiment):
-            raise ValueError("The input must be an instance of alfred.Experiment.")
+            raise ValueError("The input must be an instance of alfred3.Experiment.")
 
     def _gather_agents(self):
-        """Collect all MongoSavingAgents from the provided alfred experiment, sorted by activation level (lowest first)."""
+        """Collect all MongoSavingAgents from the provided alfred 
+        experiment, sorted by activation level (lowest first)."""
 
         self._agents = []
         for agent in self._exp.saving_agent_controller._agents:
@@ -167,9 +177,13 @@ class ExpMongoDBConnector:
 
     @property
     def db(self):
-        """Return the MongoClient collection from the experiments' ``MongoSavingAgent`` with lowest activation level.
+        """Return the MongoClient collection from the experiments' 
+        ``MongoSavingAgent`` with lowest activation level.
         
-        If the instance of ``ExpMongoDBConnector`` is not currently connected, a call to this property will trigger a call to ``ExpMongoDBConnector.connect()`` before returning the collection.
+        If the instance of :class:`ExpMongoDBConnector` is not currently
+        connected, a call to this property will trigger a call to 
+        :meth:`ExpMongoDBConnector.connect` before returning the 
+        collection.
         """
 
         if self.connected:
@@ -177,7 +191,7 @@ class ExpMongoDBConnector:
                 raise TypeError("No collection found.")
             else:
                 return self._collection
-        
+
         elif not self.connected:
             self.connect()
             if self._collection is None:
@@ -187,7 +201,8 @@ class ExpMongoDBConnector:
 
     @property
     def list_agents(self):
-        """Return a list of all ``MongoSavingAgents`` belonging to the given alfred experiment."""
+        """Return a list of all ``MongoSavingAgents`` belonging to the 
+        given alfred experiment."""
         if self._agents:
             return self._agents
         else:
