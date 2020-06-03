@@ -1,4 +1,5 @@
 import unittest
+import pytest
 import os
 import copy
 
@@ -6,6 +7,54 @@ import pymongo
 import alfred3
 
 from alfred3_dbtools import mongotools
+
+
+# class Testthepy:
+
+#     @pytest.fixture
+#     def mongodb_connector_db(self):
+#         _host = os.environ.get("MONGODB_TESTHOST")
+#         _port = int(os.environ.get("MONGODB_TESTPORT"))
+#         _user1 = os.environ.get("MONGODB_TESTUSER")
+#         _pw1 = os.environ.get("MONGODB_TESTPW")
+#         _db = os.environ.get("MONGODB_TESTDB")
+#         _col = os.environ.get("MONGODB_TESTCOL")
+#         _user2 = os.environ.get("MONGODB_TESTUSER2")
+#         _pw2 = os.environ.get("MONGODB_TESTPW2")
+#         _auth_source = os.environ.get("MONGODB_TEST2AUTH")
+
+#         connector = mongotools.MongoDBConnector(
+#             host=_host, port=None, username=_user1, password=_pw1, database=_db
+#         )
+
+#         return connector
+
+#     @pytest.fixture
+#     def mongodb_connector_col(self):
+#         _host = os.environ.get("MONGODB_TESTHOST")
+#         _port = int(os.environ.get("MONGODB_TESTPORT"))
+#         _user1 = os.environ.get("MONGODB_TESTUSER")
+#         _pw1 = os.environ.get("MONGODB_TESTPW")
+#         _db = os.environ.get("MONGODB_TESTDB")
+#         _col = os.environ.get("MONGODB_TESTCOL")
+#         _user2 = os.environ.get("MONGODB_TESTUSER2")
+#         _pw2 = os.environ.get("MONGODB_TESTPW2")
+#         _auth_source = os.environ.get("MONGODB_TEST2AUTH")
+
+#         connector = mongotools.MongoDBConnector(
+#             host=_host, port=None, username=_user1, password=_pw1, database=_db, collection=_col
+#         )
+
+#         return connector
+    
+#     def test_connect(self, mongodb_connector):
+#         con = mongodb_connector
+#         con.connect()
+
+#         assert con.connected
+    
+#     def test_default(self, mongodb_connector):
+#         assert mongodb_connector.connected == False
 
 
 class TestMongoDBConnector(unittest.TestCase):
@@ -23,7 +72,7 @@ class TestMongoDBConnector(unittest.TestCase):
     def test_minimal_connect(self):
         con = mongotools.MongoDBConnector(
             host=self._host,
-            port=self._port,
+            port=None,
             username=self._user1,
             password=self._pw1,
             database=self._db,
@@ -35,7 +84,7 @@ class TestMongoDBConnector(unittest.TestCase):
     def test_auth_source_connect(self):
         con = mongotools.MongoDBConnector(
             host=self._host,
-            port=self._port,
+            port=None,
             username=self._user2,
             password=self._pw2,
             database=self._db,
@@ -48,7 +97,7 @@ class TestMongoDBConnector(unittest.TestCase):
     def test_collection_connect(self):
         con = mongotools.MongoDBConnector(
             host=self._host,
-            port=self._port,
+            port=None,
             username=self._user2,
             password=self._pw2,
             database=self._db,
@@ -62,7 +111,7 @@ class TestMongoDBConnector(unittest.TestCase):
     def test_autoconnect(self):
         con = mongotools.MongoDBConnector(
             host=self._host,
-            port=self._port,
+            port=None,
             username=self._user2,
             password=self._pw2,
             database=self._db,
@@ -78,7 +127,7 @@ class TestMongoDBConnector(unittest.TestCase):
     def test_disconnect(self):
         con = mongotools.MongoDBConnector(
             host=self._host,
-            port=self._port,
+            port=None,
             username=self._user2,
             password=self._pw2,
             database=self._db,
@@ -93,7 +142,7 @@ class TestMongoDBConnector(unittest.TestCase):
     def test_insert_find_remove(self):
         con = mongotools.MongoDBConnector(
             host=self._host,
-            port=self._port,
+            port=None,
             username=self._user2,
             password=self._pw2,
             database=self._db,
@@ -125,7 +174,7 @@ class TestExpMongoDBConnector(unittest.TestCase):
         self.exp = alfred3.Experiment()
 
         self.agent = alfred3.saving_agent.MongoSavingAgent(
-            host=self._host + ":" + str(self._port),
+            host=self._host,
             database=self._db,
             collection=self._col,
             user=self._user,
