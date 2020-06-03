@@ -21,7 +21,7 @@ Alfred3 DBTools Documentation
    :maxdepth: 3
    :hidden:
 
-   CHANGELOG.md
+   CHANGELOG
    example
    apireference
 
