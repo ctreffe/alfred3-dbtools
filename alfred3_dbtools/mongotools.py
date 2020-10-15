@@ -53,6 +53,8 @@ class MongoDBConnector:
         self.connected = False
         """`True`, if a connection was established."""
 
+        self.connect()
+
     def connect(self):
         """Establish the connection the MongoDB.
 
@@ -112,99 +114,103 @@ class ExpMongoDBConnector:
     are attached to the experiment, :class:`ExpMongoDBConnector` will connect
     to the `MongoSavingAgent` with the lowest activation level. 
     Basically, it provides access to a copy of the
-    :class:`~pymongo.MongoClient` that the experiment's saving agent
-    uses. For further information on how to interact with a
+    :class:`pymongo.collection.Collection` that the experiment's saving agent
+    uses. 
+
+    For further information on how to interact with a
     `MongoClient`, please refer to the 
     `pymongo documentation <https://pymongo.readthedocs.io/en/stable/tutorial.html>`_.
 
-    :param experiment: An instance of :class:`alfred.Experiment`.
-    :type experiment: class: `alfred3.Experiment`
-    :raise: ValueError if not initialised with an alfred experiment.
+    Args:
+        experiment: An alfred3 experiment instance.
     """
 
     def __init__(self, experiment: alfred3.Experiment):
         """Constructor method."""
 
         self._exp = experiment
-        self._agents = None
-
-        self._client = None
-        self._collection = None
-
-        self.connected = False
-        """`True`, if a connection was established."""
 
         if not isinstance(self._exp, alfred3.Experiment):
             raise ValueError("The input must be an instance of alfred3.Experiment.")
 
-    def _gather_agents(self):
+        self.exp_data_agents = []
+        self.unlinked_data_agents = []
+        self.codebook_agents = []
+
+        self._gather_agents(self.exp_data_agents, self._exp.sac_main)
+        self._gather_agents(self.unlinked_data_agents, self._exp.sac_unlinked)
+        self._gather_agents(self.codebook_agents, self._exp.sac_codebook)
+
+        self._exp_collection = self._connect(self.exp_data_agents)
+        self._unlinked_collection = self._connect(self.unlinked_data_agents)
+        self._misc_collection = self._connect(self.codebook_agents)
+
+    def _gather_agents(self, agent_list, sac):
         """Collect all MongoSavingAgents from the provided alfred 
-        experiment, sorted by activation level (lowest first)."""
+        experiment, sorted by activation level (lowest first).
+        
+        Args:
+            agent_list: The list in which saving agents should be 
+                collected.
+            sac: The SavingAgentController, from which saving agents
+                should be collected.
+        """
 
-        self._agents = []
-        for agent in self._exp.saving_agent_controller._agents:
+        for agent in sac.agents.values():
             if isinstance(agent, alfred3.saving_agent.MongoSavingAgent):
-                self._agents.append(copy.copy(agent))
-        if not self._agents:
-            raise ValueError(
-                "Your experiment needs at least one MongoSavingAgent for ExpMongoDBConnector to work."
-            )
-        self._agents.sort(key=lambda x: x.activation_level)
+                agent_list.append(copy.copy(agent))
+        agent_list.sort(key=lambda x: x.activation_level)
 
-    def connect(self):
-        """Establish a connection to the experiment's MongoDB with the lowest activation level."""
-
-        self._gather_agents()
+    def _connect(self, agent_list):
+        """Establishes a connection to the MongoDB collection with the 
+        lowest activation level in *agent_list*."""
 
         if (
-            len(self._agents) > 1
-            and self._agents[0].activation_level == self._agents[1].activation_level
+            len(agent_list) > 1
+            and agent_list[0].activation_level == agent_list[1].activation_level
         ):
             raise ValueError(
                 "There are two or more MongoSavingAgents with the highest activation level."
             )
 
-        self._client = self._agents[0]._mc
-        self._collection = self._agents[0]._col
-        self.connected = True
+        try:
+            return agent_list[0]._col
+        except IndexError:
+            pass
 
-    def disconnect(self):
-        """Close the connection to the database."""
+    @property
+    def unlinked_col(self):
+        """Returns the unlinked mongoDB collection belonging to the
+        experiment.
+        """
+        if not self._unlinked_collection:
+            raise ValueError("No unlinked collection found.")
+        return self._unlinked_collection
 
-        if self.connected:
-            self._client.close()
-            self.connected = False
+    @property
+    def misc_col(self):
+        """Returns the miscellaneous mongoDB collection belonging to the
+        experiment.
+        """
+        if not self._misc_collection:
+            raise ValueError("No miscellaneous collection found.")
+        return self._misc_collection
 
     @property
     def db(self):
-        """Return the MongoClient collection from the experiments' 
+        """Returns the mongoDB collection from the experiment's 
         ``MongoSavingAgent`` with lowest activation level.
-        
-        If the instance of :class:`ExpMongoDBConnector` is not currently
-        connected, a call to this property will trigger a call to 
-        :meth:`ExpMongoDBConnector.connect` before returning the 
-        collection.
         """
-
-        if self.connected:
-            if self._collection is None:
-                raise TypeError("No collection found.")
-            else:
-                return self._collection
-
-        elif not self.connected:
-            self.connect()
-            if self._collection is None:
-                raise TypeError("No collection found.")
-            else:
-                return self._collection
+        DeprecationWarning("This property is deprecated. Please use 'exp' instead.")
+        if not self._exp_collection:
+            raise ValueError("No experiment data collection found.")
+        return self._exp_collection
 
     @property
-    def list_agents(self):
-        """Return a list of all ``MongoSavingAgents`` belonging to the 
-        given alfred experiment."""
-        if self._agents:
-            return self._agents
-        else:
-            self._gather_agents()
-            return self._agents
+    def exp_col(self):
+        """Returns the mongoDB collection from the experiment's 
+        ``MongoSavingAgent`` with lowest activation level.
+        """
+        if not self._exp_collection:
+            raise ValueError("No experiment data collection found.")
+        return self._exp_collection
