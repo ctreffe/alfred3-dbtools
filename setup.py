@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -6,7 +8,7 @@ with open("README.md", "r") as fh:
 # Parse version from _version.py in package directory
 # See https://packaging.python.org/guides/single-sourcing-package-version/#single-sourcing-the-version
 version = {}
-with open('alfred3_dbtools/_version.py') as f:
+with open("alfred3_dbtools/_version.py") as f:
     exec(f.read(), version)
 
 setuptools.setup(
@@ -25,5 +27,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',
+    python_requires=">=3.7",
 )
